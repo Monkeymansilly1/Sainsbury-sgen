@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sainsbury's Barcode Generator</title>
+<style>
+body {
+font-family: Arial, sans-serif;
+background-color: #f47738;
+color: #fff;
+padding: 2rem;
+text-align: center;
+position: relative;
+background-image:
+repeating-linear-gradient(45deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 1px, transparent 1px, transparent 20px),
+repeating-linear-gradient(-45deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 1px, transparent 1px, transparent 20px);
+}
+.watermark {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+pointer-events: none;
+z-index: 0;
+opacity: 0.4;
+}
+.watermark span {
+position: absolute;
+color: rgba(255, 255, 255, 0.4);
+font-size: 2rem;
+font-weight: bold;
+transform: rotate(-30deg);
+white-space: nowrap;
+}
+.container {
+position: relative;
+z-index: 1;
+background: #fff;
+color: #333;
+padding: 2rem;
+border-radius: 1rem;
+max-width: 500px;
+margin: 0 auto;
+box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+input, button {
+padding: 0.5rem;
+font-size: 1rem;
+margin: 0.5rem 0;
+width: 100%;
+}
+canvas {
+margin-top: 1rem;
+background: #fff;
+}
+.note {
+color: #c00;
+font-weight: bold;
+margin-top: 0.5rem;
+}
+</style>
+</head>
+<body>
+<div class="watermark" id="watermark"></div>
+<div class="container">
+<h1>Sainsbury's Barcode Generator</h1>
+<input type="text" id="productCode" placeholder="Enter original product barcode" maxlength="13" pattern="\d*" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'').slice(0,13)" onpaste="setTimeout(() => this.value = this.value.replace(/\D/g,'').slice(0,13), 0)">
+<input type="number" id="price" placeholder="Enter price (e.g., 100 = £1.00)" min="10" max="9999">
+<button onclick="generateBarcode()">Generate Barcode</button>
+<div class="note">most 10p barcodes are patched</div>
+<canvas id="barcodeCanvas"></canvas>
+<a id="downloadLink" download="barcode.png"><button>Download as PNG</button></a>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+<script>
+function padLeft(str, length) {
+return str.toString().padStart(length, '0');
+}
+function calculateCheckDigit(input) {
+let sum = 0;
+for (let i = 0; i < input.length; i++) {
+const digit = parseInt(input[input.length - 1 - i], 10);
+const weight = (i % 2 === 0) ? 3 : 1;
+sum += digit * weight;
+}
+let checkDigit = (10 - (sum % 10)) % 10;
+if (checkDigit % 2 === 0) {
+checkDigit = (checkDigit + 1) % 10;
+}
+return checkDigit;
+}
+function generateBarcode() {
+const productInput = document.getElementById('productCode').value;
+const priceInput = parseInt(document.getElementById('price').value);
+if (isNaN(priceInput) || priceInput < 10 || priceInput > 9999) {
+alert("Price must be between 10 and 9999 (e.g., 100 = £1.00)");
+return;
+}
+const numericProduct = productInput.replace(/\D/g, '');
+let productDigits = numericProduct;
+if (productDigits.length === 14) {
+productDigits = productDigits.slice(0, -1);
+}
+productDigits = padLeft(productDigits, 13);
+const paddedPrice = padLeft(priceInput, 6);
+const baseNumber = `91${productDigits}${paddedPrice}`;
+const checkDigit = calculateCheckDigit(baseNumber);
+const fullBarcode = `${baseNumber}${checkDigit}`;
+const canvas = document.getElementById("barcodeCanvas");
+const ctx = canvas.getContext("2d");
+canvas.width = 600;
+canvas.height = 200;
+JsBarcode(canvas, fullBarcode, {
+format: "CODE128",
+displayValue: true,
+fontSize: 18,
+width: 2,
+height: 100,
+margin: 10
+});
+ctx.font = "16px Arial";
+ctx.fillStyle = "black";
+ctx.textAlign = "center";
+ctx.fillText("hi", canvas.width / 2, 190);
+const downloadLink = document.getElementById("downloadLink");
+downloadLink.href = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+}
+const watermarkDiv = document.getElementById('watermark');
+const rows = 10;
+const cols = 10;
+for (let y = 0; y < rows; y++) {
+for (let x = 0; x < cols; x++) {
+const span = document.createElement('span');
+span.innerText = 'MONKEY LOVER';
+span.style.top = `${y * 100}px`;
+span.style.left = `${x * 200}px`;
+watermarkDiv.appendChild(span);
+}
+}
+</script>
+</body>
+</html>
