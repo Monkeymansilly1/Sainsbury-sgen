@@ -3,120 +3,66 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Monkey Lover Barcode Generator</title>
+  <title>Sainsbury's Barcode Generator</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #121212;
+      font-family: Arial, sans-serif;
+      background-color: #f47738;
       color: #fff;
-      margin: 0;
+      text-align: center;
       padding: 2rem;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      position: relative;
-      overflow: hidden;
     }
 
     .container {
-      background-color: #1e1e1e;
+      background: #fff;
+      color: #000;
       padding: 2rem;
       border-radius: 1rem;
       max-width: 500px;
-      width: 100%;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-      z-index: 2;
-    }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 1.5rem;
-      font-size: 1.5rem;
+      margin: auto;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     }
 
     input, button {
-      width: 100%;
-      padding: 0.75rem;
-      margin: 0.5rem 0;
+      padding: 0.5rem;
       font-size: 1rem;
-      border: none;
-      border-radius: 0.5rem;
-      box-sizing: border-box;
-    }
-
-    input {
-      background: #2c2c2c;
-      color: #fff;
-    }
-
-    button {
-      background-color: #ff9800;
-      color: #000;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-
-    button:hover {
-      background-color: #e68900;
-    }
-
-    canvas {
-      background: #fff;
       margin-top: 1rem;
       width: 100%;
     }
 
-    .note {
-      color: #f44336;
-      text-align: center;
+    #priceDisplay {
+      font-size: 2.5rem;
       font-weight: bold;
-      margin-top: 0.5rem;
+      margin: 1rem 0;
     }
 
-    .watermark {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-      pointer-events: none;
-      overflow: hidden;
+    canvas {
+      margin-top: 1rem;
+      background: white;
     }
 
-    .watermark span {
-      position: absolute;
-      color: rgba(255, 255, 255, 0.03);
-      font-size: 2rem;
-      font-weight: bold;
-      transform: rotate(-30deg);
-      white-space: nowrap;
-      user-select: none;
+    .logo {
+      max-width: 200px;
+      margin-bottom: 1rem;
     }
   </style>
 </head>
 <body>
-  <div class="watermark" id="watermark"></div>
-
   <div class="container">
-    <h1>Monkey Lover Barcode Generator</h1>
-    <input
-      type="text"
-      id="productCode"
-      placeholder="Enter original product barcode"
-      maxlength="13"
-      pattern="\d*"
-      inputmode="numeric"
-      oninput="this.value=this.value.replace(/\D/g,'').slice(0,13)"
-      onpaste="setTimeout(() => this.value = this.value.replace(/\D/g,'').slice(0,13), 0)"
-    >
-    <input type="number" id="price" placeholder="Enter price (e.g., 100 = £1.00)" min="10" max="9999">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Sainsbury%27s_logo.svg/320px-Sainsbury%27s_logo.svg.png" alt="Sainsbury's Logo" class="logo" />
+    
+    <input type="text" id="productCode" placeholder="Enter 13-digit barcode" maxlength="13"
+      oninput="this.value=this.value.replace(/\\D/g,'').slice(0,13)" />
+      
+    <input type="number" id="price" placeholder="Enter price (e.g., 10 = 10p)" min="1" max="9999" />
+    
     <button onclick="generateBarcode()">Generate Barcode</button>
-    <div class="note">Note: Most 10p barcodes are patched</div>
+
+    <div id="priceDisplay"></div>
     <canvas id="barcodeCanvas"></canvas>
+    
     <a id="downloadLink" download="barcode.png">
-      <button>Download as PNG</button>
+      <button style="margin-top: 1rem;">Download as PNG</button>
     </a>
   </div>
 
@@ -143,13 +89,14 @@
     function generateBarcode() {
       const productInput = document.getElementById('productCode').value;
       const priceInput = parseInt(document.getElementById('price').value);
+      const priceDisplay = document.getElementById('priceDisplay');
 
-      if (isNaN(priceInput) || priceInput < 10 || priceInput > 9999) {
-        alert("Price must be between 10 and 9999 (e.g., 100 = £1.00)");
+      if (isNaN(priceInput) || priceInput < 1 || priceInput > 9999) {
+        alert("Price must be between 1 and 9999 (e.g., 10 = 10p)");
         return;
       }
 
-      const numericProduct = productInput.replace(/\D/g, '');
+      const numericProduct = productInput.replace(/\\D/g, '');
       let productDigits = numericProduct.length === 14 ? numericProduct.slice(0, -1) : numericProduct;
       productDigits = padLeft(productDigits, 13);
 
@@ -172,21 +119,10 @@
         margin: 10
       });
 
+      priceDisplay.textContent = `${priceInput}p`;
+
       const downloadLink = document.getElementById("downloadLink");
       downloadLink.href = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
-    }
-
-    const watermarkDiv = document.getElementById('watermark');
-    const rows = 8;
-    const cols = 6;
-    for (let y = 0; y < rows; y++) {
-      for (let x = 0; x < cols; x++) {
-        const span = document.createElement('span');
-        span.innerText = 'MONKEY LOVER';
-        span.style.top = `${y * 100}px`;
-        span.style.left = `${x * 200}px`;
-        watermarkDiv.appendChild(span);
-      }
     }
   </script>
 </body>
