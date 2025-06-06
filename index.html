@@ -60,6 +60,7 @@
     canvas {
       margin-top: 1rem;
       background: white;
+      height: 200px;
     }
 
     .logo {
@@ -87,7 +88,9 @@
     </a>
   </div>
 
+  <!-- ✅ Correct JsBarcode include -->
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+
   <script>
     function padLeft(str, length) {
       return str.toString().padStart(length, '0');
@@ -127,14 +130,10 @@
       const fullBarcode = `${baseNumber}${checkDigit}`;
 
       const canvas = document.getElementById("barcodeCanvas");
-      const ctx = canvas.getContext("2d");
       canvas.width = 600;
       canvas.height = 200;
 
-      // Clear canvas
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Generate barcode
+      // ✅ Generate barcode using JsBarcode
       JsBarcode(canvas, fullBarcode, {
         format: "CODE128",
         displayValue: true,
@@ -144,7 +143,8 @@
         margin: 10
       });
 
-      // Add watermark
+      // ✅ Watermark after JsBarcode renders
+      const ctx = canvas.getContext("2d");
       ctx.font = "30px Arial";
       ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
       ctx.translate(300, 100);
@@ -152,10 +152,8 @@
       ctx.fillText("ilikemonkeys14569", -150, 0);
       ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
 
-      // Show price
       priceDisplay.textContent = `${priceInput}p`;
 
-      // Set download link
       const downloadLink = document.getElementById("downloadLink");
       downloadLink.href = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
     }
