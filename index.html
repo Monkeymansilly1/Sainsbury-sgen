@@ -63,9 +63,20 @@
       height: 200px;
     }
 
-    .logo {
-      max-width: 200px;
-      margin-bottom: 1rem;
+    button.price-button {
+      width: 100px;
+      background-color: #f47738;
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      margin: 0.5rem;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button.price-button:hover {
+      background-color: #d85c20;
     }
   </style>
 </head>
@@ -75,20 +86,27 @@
 
     <input type="text" id="productCode" placeholder="Enter 13-digit barcode" maxlength="13"
       oninput="this.value=this.value.replace(/\\D/g,'').slice(0,13)" />
-      
-    <input type="number" id="price" placeholder="Enter price (e.g., 10 = 10p)" min="1" max="9999" />
-    
-    <button onclick="generateBarcode()">Generate Barcode</button>
+
+    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem;">
+      <button class="price-button" onclick="setPriceAndGenerate(10)">10p</button>
+      <button class="price-button" onclick="setPriceAndGenerate(49)">49p</button>
+      <button class="price-button" onclick="setPriceAndGenerate(100)">£1</button>
+      <button class="price-button" onclick="showCustomPrice()">Custom</button>
+    </div>
+
+    <div id="customPriceContainer" style="display: none;">
+      <input type="number" id="price" placeholder="Enter price (e.g., 10 = 10p)" min="1" max="9999" />
+      <button onclick="generateBarcode()">Generate Barcode</button>
+    </div>
 
     <div id="priceDisplay"></div>
     <canvas id="barcodeCanvas"></canvas>
-    
+
     <a id="downloadLink" download="barcode.png">
       <button style="margin-top: 1rem;">Download as PNG</button>
     </a>
   </div>
 
-  <!-- ✅ Correct JsBarcode include -->
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 
   <script>
@@ -133,7 +151,6 @@
       canvas.width = 600;
       canvas.height = 200;
 
-      // ✅ Generate barcode using JsBarcode
       JsBarcode(canvas, fullBarcode, {
         format: "CODE128",
         displayValue: true,
@@ -143,20 +160,29 @@
         margin: 10
       });
 
-      // ✅ Watermark after JsBarcode renders
       const ctx = canvas.getContext("2d");
       ctx.font = "30px Arial";
       ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
       ctx.translate(300, 100);
       ctx.rotate(-Math.PI / 4);
       ctx.fillText("ilikemonkeys14569", -150, 0);
-      ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
 
       priceDisplay.textContent = `${priceInput}p`;
 
       const downloadLink = document.getElementById("downloadLink");
       downloadLink.href = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
     }
+
+    function setPriceAndGenerate(pence) {
+      document.getElementById('price').value = pence;
+      document.getElementById('customPriceContainer').style.display = 'none';
+      generateBarcode();
+    }
+
+    function showCustomPrice() {
+      document.getElementById('customPriceContainer').style.display = 'block';
+    }
   </script>
 </body>
-</html>
+        </html>
