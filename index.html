@@ -5,49 +5,51 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Sainsbury's Barcode Generator</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f47738;
-      color: #fff;
-      text-align: center;
-      padding: 2rem;
-      position: relative;
+    :root {
+      --bg-color: #f47738;
+      --text-color: #fff;
+      --card-bg: #fff;
+      --card-text: #000;
+      --button-bg: #f47738;
+      --button-text: #fff;
+      --caption-color: #333;
     }
 
-    body::before {
-      content: "ilikemonkeys14569";
-      position: fixed;
-      top: 0;
-      left: 0;
-      font-size: 4rem;
-      color: rgba(255, 255, 255, 0.03);
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      pointer-events: none;
-      white-space: nowrap;
-      transform: rotate(-30deg);
+    body.dark-mode {
+      --bg-color: #121212;
+      --text-color: #e0e0e0;
+      --card-bg: #1e1e1e;
+      --card-text: #e0e0e0;
+      --button-bg: #333;
+      --button-text: #f47738;
+      --caption-color: #bbb;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      text-align: center;
+      padding: 2rem;
+      margin: 0;
+      transition: all 0.3s ease;
     }
 
     .container {
-      background: #fff;
-      color: #000;
+      background: var(--card-bg);
+      color: var(--card-text);
       padding: 2rem;
       border-radius: 1rem;
       max-width: 500px;
       margin: auto;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      position: relative;
-      z-index: 1;
-      animation: fadeIn 0.6s ease forwards;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
     }
 
-    @keyframes fadeIn {
-      0% { opacity: 0; transform: translateY(20px); }
-      100% { opacity: 1; transform: translateY(0); }
+    .logo {
+      max-width: 250px;
+      height: auto;
+      margin-bottom: 1rem;
     }
 
     input, button {
@@ -55,77 +57,82 @@
       font-size: 1rem;
       margin-top: 1rem;
       width: 100%;
-    }
-
-    #priceDisplay {
-      font-size: 3rem;
-      font-weight: bold;
-      margin: 1rem 0;
-      animation: pricePop 0.5s ease forwards;
-      transition: color 0.3s ease;
-    }
-
-    @keyframes pricePop {
-      0% { transform: scale(0.7); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
+      border-radius: 0.5rem;
+      border: 1px solid #ccc;
     }
 
     .barcode-frame {
-      background: white;
-      padding: 1rem;
+      background: var(--card-bg);
       border-radius: 1rem;
-      border: 2px solid #ddd;
+      padding: 1rem;
       margin-top: 1rem;
       box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-      display: inline-block;
-      animation: fadeIn 0.5s ease forwards;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: 100%;
+      overflow: hidden;
     }
 
     canvas {
-      background: white;
+      width: 100%;
+      height: auto;
+      max-width: 400px;
+      background: var(--card-bg);
     }
 
-    button.price-button, button.generate-btn, #downloadLink button {
-      width: 100px;
-      background-color: #f47738;
-      color: white;
+    .barcode-caption {
+      font-size: 0.9rem;
+      color: var(--caption-color);
+      margin-top: 0.5rem;
+      word-break: break-word;
+      text-align: center;
+    }
+
+    button {
+      background-color: var(--button-bg);
+      color: var(--button-text);
       border: none;
-      border-radius: 0.5rem;
-      margin: 0.5rem;
-      padding: 0.5rem 1rem;
       cursor: pointer;
-      font-weight: bold;
-      transition: background-color 0.3s, transform 0.2s;
+      transition: background 0.3s;
     }
 
-    button.price-button:hover, button.generate-btn:hover, #downloadLink button:hover {
-      transform: scale(1.05);
-      background-color: #d85c20 !important;
+    button:hover {
+      opacity: 0.9;
+    }
+
+    #toggleMode {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: var(--card-bg);
+      color: var(--text-color);
+      border: 2px solid var(--text-color);
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      z-index: 999;
     }
   </style>
 </head>
 <body>
+
+  <button id="toggleMode" onclick="toggleDarkMode()">Toggle Mode</button>
+
   <div class="container">
-    <h1>Sainsbury's</h1>
-    <input type="text" id="productCode" placeholder="Enter 13-digit barcode" maxlength="13"
-      oninput="this.value=this.value.replace(/\\D/g,'').slice(0,13)" />
+    <img src="https://raw.githubusercontent.com/Monkeymansilly1/Sainsbury-sgen/main/sainsburys-logo-png-transparent.png" alt="Sainsbury's Logo" class="logo" />
 
-    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem;">
-      <button class="price-button" onclick="setPriceAndGenerate(10)">10p</button>
-      <button class="price-button" onclick="setPriceAndGenerate(49)">49p</button>
-      <button class="price-button" onclick="setPriceAndGenerate(100)">£1</button>
-      <button class="price-button" onclick="showCustomPrice()">Custom</button>
-    </div>
+    <h2>Sainsbury's Barcode Generator</h2>
 
-    <div id="customPriceContainer" style="display: none;">
-      <input type="number" id="price" placeholder="Enter price (e.g., 10 = 10p)" min="1" max="9999" />
-      <button class="generate-btn" onclick="generateBarcode()">Generate</button>
-    </div>
-
-    <div id="priceDisplay"></div>
+    <input type="text" id="productCode" placeholder="Enter 13-digit barcode" maxlength="13" />
+    <input type="number" id="price" placeholder="Enter price (pence)" min="1" max="9999" />
+    <button onclick="generateBarcode()">Generate Barcode</button>
 
     <div class="barcode-frame">
       <canvas id="barcodeCanvas" width="400" height="150"></canvas>
+      <div class="barcode-caption">
+        monkeymansilly1.github.io
+      </div>
     </div>
 
     <a id="downloadLink" download="barcode.png">
@@ -134,7 +141,6 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-
   <script>
     function padLeft(str, length) {
       return str.toString().padStart(length, '0');
@@ -157,14 +163,13 @@
     function generateBarcode() {
       const productInput = document.getElementById('productCode').value;
       const priceInput = parseInt(document.getElementById('price').value);
-      const priceDisplay = document.getElementById('priceDisplay');
 
       if (isNaN(priceInput) || priceInput < 1 || priceInput > 9999) {
         alert("Price must be between 1 and 9999 (e.g., 10 = 10p)");
         return;
       }
 
-      const numericProduct = productInput.replace(/\\D/g, '');
+      const numericProduct = productInput.replace(/\D/g, '');
       let productDigits = numericProduct.length === 14 ? numericProduct.slice(0, -1) : numericProduct;
       productDigits = padLeft(productDigits, 13);
 
@@ -174,33 +179,23 @@
       const fullBarcode = `${baseNumber}${checkDigit}`;
 
       const canvas = document.getElementById("barcodeCanvas");
-      const ctx = canvas.getContext("2d");
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
       JsBarcode(canvas, fullBarcode, {
         format: "CODE128",
         displayValue: true,
-        fontSize: 16,
+        fontSize: 18,
         width: 2,
-        height: 80,
-        margin: 0
+        height: 100,
+        margin: 10
       });
-
-      priceDisplay.textContent = `${priceInput}p`;
 
       const downloadLink = document.getElementById("downloadLink");
       downloadLink.href = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
     }
 
-    function setPriceAndGenerate(pence) {
-      document.getElementById('price').value = pence;
-      document.getElementById('customPriceContainer').style.display = 'none';
-      generateBarcode();
-    }
-
-    function showCustomPrice() {
-      document.getElementById('customPriceContainer').style.display = 'block';
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark-mode");
     }
   </script>
+
 </body>
 </html>
