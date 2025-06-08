@@ -19,8 +19,8 @@
       position: fixed;
       top: 0;
       left: 0;
-      font-size: 5rem;
-      color: rgba(255, 255, 255, 0.05);
+      font-size: 4rem;
+      color: rgba(255, 255, 255, 0.03);
       width: 100%;
       height: 100%;
       z-index: 0;
@@ -39,9 +39,15 @@
       border-radius: 1rem;
       max-width: 500px;
       margin: auto;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
       position: relative;
       z-index: 1;
+      animation: fadeIn 0.6s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
     }
 
     input, button {
@@ -52,18 +58,34 @@
     }
 
     #priceDisplay {
-      font-size: 2.5rem;
+      font-size: 3rem;
       font-weight: bold;
       margin: 1rem 0;
+      animation: pricePop 0.5s ease forwards;
+      transition: color 0.3s ease;
+    }
+
+    @keyframes pricePop {
+      0% { transform: scale(0.7); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .barcode-frame {
+      background: white;
+      padding: 1rem;
+      border-radius: 1rem;
+      border: 2px solid #ddd;
+      margin-top: 1rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      display: inline-block;
+      animation: fadeIn 0.5s ease forwards;
     }
 
     canvas {
-      margin-top: 1rem;
       background: white;
-      height: 200px;
     }
 
-    button.price-button {
+    button.price-button, button.generate-btn, #downloadLink button {
       width: 100px;
       background-color: #f47738;
       color: white;
@@ -73,17 +95,18 @@
       padding: 0.5rem 1rem;
       cursor: pointer;
       font-weight: bold;
+      transition: background-color 0.3s, transform 0.2s;
     }
 
-    button.price-button:hover {
-      background-color: #d85c20;
+    button.price-button:hover, button.generate-btn:hover, #downloadLink button:hover {
+      transform: scale(1.05);
+      background-color: #d85c20 !important;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <img src="sainsburys-logo-png-transparent.png" alt="Sainsbury's Logo" width="400" height="auto" />
-
+    <h1>Sainsbury's</h1>
     <input type="text" id="productCode" placeholder="Enter 13-digit barcode" maxlength="13"
       oninput="this.value=this.value.replace(/\\D/g,'').slice(0,13)" />
 
@@ -96,11 +119,14 @@
 
     <div id="customPriceContainer" style="display: none;">
       <input type="number" id="price" placeholder="Enter price (e.g., 10 = 10p)" min="1" max="9999" />
-      <button onclick="generateBarcode()">Generate Barcode</button>
+      <button class="generate-btn" onclick="generateBarcode()">Generate</button>
     </div>
 
     <div id="priceDisplay"></div>
-    <canvas id="barcodeCanvas"></canvas>
+
+    <div class="barcode-frame">
+      <canvas id="barcodeCanvas" width="400" height="150"></canvas>
+    </div>
 
     <a id="downloadLink" download="barcode.png">
       <button style="margin-top: 1rem;">Download as PNG</button>
@@ -138,7 +164,7 @@
         return;
       }
 
-      const numericProduct = productInput.replace(/\D/g, '');
+      const numericProduct = productInput.replace(/\\D/g, '');
       let productDigits = numericProduct.length === 14 ? numericProduct.slice(0, -1) : numericProduct;
       productDigits = padLeft(productDigits, 13);
 
@@ -148,25 +174,17 @@
       const fullBarcode = `${baseNumber}${checkDigit}`;
 
       const canvas = document.getElementById("barcodeCanvas");
-      canvas.width = 600;
-      canvas.height = 200;
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       JsBarcode(canvas, fullBarcode, {
         format: "CODE128",
         displayValue: true,
-        fontSize: 18,
+        fontSize: 16,
         width: 2,
-        height: 100,
-        margin: 10
+        height: 80,
+        margin: 0
       });
-
-      const ctx = canvas.getContext("2d");
-      ctx.font = "30px Arial";
-      ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
-      ctx.translate(300, 100);
-      ctx.rotate(-Math.PI / 4);
-      ctx.fillText("ilikemonkeys14569", -150, 0);
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
 
       priceDisplay.textContent = `${priceInput}p`;
 
@@ -185,4 +203,4 @@
     }
   </script>
 </body>
-        </html>
+</html>
