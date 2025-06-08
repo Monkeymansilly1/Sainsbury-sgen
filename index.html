@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Sainsbury's Barcode Generator</title>
   <style>
@@ -27,11 +27,11 @@
 
     body {
       font-family: Arial, sans-serif;
-      background-color: var(--bg-color);
+      background: var(--bg-color);
       color: var(--text-color);
       text-align: center;
-      padding: 2rem;
       margin: 0;
+      padding: 2rem 1rem;
       transition: all 0.3s ease;
     }
 
@@ -40,25 +40,32 @@
       color: var(--card-text);
       padding: 2rem;
       border-radius: 1rem;
-      max-width: 500px;
+      max-width: 480px;
       margin: auto;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
       transition: all 0.3s ease;
     }
 
     .logo {
-      max-width: 250px;
+      max-width: 220px;
       height: auto;
       margin-bottom: 1rem;
     }
 
-    input, button {
-      padding: 0.5rem;
+    .button-group button {
+      background: var(--button-bg);
+      color: var(--button-text);
+      border: none;
+      padding: 0.6rem 1rem;
+      margin: 0.3rem;
+      border-radius: 0.6rem;
       font-size: 1rem;
-      margin-top: 1rem;
-      width: 100%;
-      border-radius: 0.5rem;
-      border: 1px solid #ccc;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .button-group button:hover {
+      opacity: 0.85;
     }
 
     .barcode-frame {
@@ -70,14 +77,13 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      max-width: 100%;
       overflow: hidden;
     }
 
     canvas {
       width: 100%;
-      height: auto;
       max-width: 400px;
+      height: auto;
       background: var(--card-bg);
     }
 
@@ -86,47 +92,80 @@
       color: var(--caption-color);
       margin-top: 0.5rem;
       word-break: break-word;
-      text-align: center;
     }
 
-    button {
-      background-color: var(--button-bg);
+    .input-box {
+      margin-top: 1rem;
+    }
+
+    input {
+      padding: 0.5rem;
+      font-size: 1rem;
+      margin: 0.3rem 0;
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 0.5rem;
+    }
+
+    .download-btn {
+      background: var(--button-bg);
       color: var(--button-text);
       border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 0.6rem;
+      font-size: 1rem;
+      margin-top: 1rem;
       cursor: pointer;
-      transition: background 0.3s;
+      transition: 0.3s;
     }
 
-    button:hover {
-      opacity: 0.9;
+    .download-btn:hover {
+      opacity: 0.85;
     }
 
-    #toggleMode {
+    .toggle-btn {
       position: fixed;
       top: 1rem;
       right: 1rem;
       background: var(--card-bg);
       color: var(--text-color);
       border: 2px solid var(--text-color);
-      padding: 0.5rem 1rem;
-      border-radius: 0.5rem;
+      padding: 0.6rem 1rem;
+      border-radius: 2rem;
+      font-size: 0.9rem;
       cursor: pointer;
       z-index: 999;
+      transition: 0.3s;
+    }
+
+    .toggle-btn:hover {
+      background: var(--text-color);
+      color: var(--card-bg);
     }
   </style>
 </head>
 <body>
 
-  <button id="toggleMode" onclick="toggleDarkMode()">Toggle Mode</button>
+  <button id="toggleMode" class="toggle-btn" onclick="toggleDarkMode()">🌙 Dark Mode</button>
 
   <div class="container">
     <img src="https://raw.githubusercontent.com/Monkeymansilly1/Sainsbury-sgen/main/sainsburys-logo-png-transparent.png" alt="Sainsbury's Logo" class="logo" />
 
     <h2>Sainsbury's Barcode Generator</h2>
 
-    <input type="text" id="productCode" placeholder="Enter 13-digit barcode" maxlength="13" />
-    <input type="number" id="price" placeholder="Enter price (pence)" min="1" max="9999" />
-    <button onclick="generateBarcode()">Generate Barcode</button>
+    <div class="button-group">
+      <button onclick="setPrice(10)">10p</button>
+      <button onclick="setPrice(40)">40p</button>
+      <button onclick="setPrice(100)">£1</button>
+      <button onclick="customPrice()">Custom</button>
+    </div>
+
+    <div class="input-box">
+      <input type="text" id="productCode" placeholder="Enter 13-digit barcode" maxlength="13" />
+      <input type="number" id="price" placeholder="Or enter price (p)" min="1" max="9999" />
+    </div>
+
+    <button class="download-btn" onclick="generateBarcode()">Generate Barcode</button>
 
     <div class="barcode-frame">
       <canvas id="barcodeCanvas" width="400" height="150"></canvas>
@@ -136,7 +175,7 @@
     </div>
 
     <a id="downloadLink" download="barcode.png">
-      <button style="margin-top: 1rem;">Download as PNG</button>
+      <button class="download-btn">Download PNG</button>
     </a>
   </div>
 
@@ -158,6 +197,19 @@
         checkDigit = (checkDigit + 1) % 10;
       }
       return checkDigit;
+    }
+
+    function setPrice(pence) {
+      document.getElementById("price").value = pence;
+    }
+
+    function customPrice() {
+      const custom = prompt("Enter your custom price in pence (1 - 9999):");
+      if (custom && !isNaN(custom) && custom >= 1 && custom <= 9999) {
+        document.getElementById("price").value = custom;
+      } else {
+        alert("Invalid price entered.");
+      }
     }
 
     function generateBarcode() {
@@ -196,6 +248,5 @@
       document.body.classList.toggle("dark-mode");
     }
   </script>
-
 </body>
-</html>
+      </html>
