@@ -1,252 +1,193 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8" />
   <title>Sainsbury's Barcode Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    :root {
-      --bg-color: #f47738;
-      --text-color: #fff;
-      --card-bg: #fff;
-      --card-text: #000;
-      --button-bg: #f47738;
-      --button-text: #fff;
-      --caption-color: #333;
-    }
-
-    body.dark-mode {
-      --bg-color: #121212;
-      --text-color: #e0e0e0;
-      --card-bg: #1e1e1e;
-      --card-text: #e0e0e0;
-      --button-bg: #333;
-      --button-text: #f47738;
-      --caption-color: #bbb;
-    }
-
     body {
       font-family: Arial, sans-serif;
-      background: var(--bg-color);
-      color: var(--text-color);
-      text-align: center;
+      background-color: #111;
+      color: #eee;
       margin: 0;
-      padding: 2rem 1rem;
-      transition: all 0.3s ease;
+      padding: 1rem;
+      text-align: center;
+      transition: background 0.3s, color 0.3s;
     }
 
     .container {
-      background: var(--card-bg);
-      color: var(--card-text);
-      padding: 2rem;
+      background: #222;
+      color: #fff;
+      padding: 1.5rem;
       border-radius: 1rem;
-      max-width: 480px;
+      max-width: 450px;
       margin: auto;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-      transition: all 0.3s ease;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
     }
 
-    .logo {
-      max-width: 220px;
+    img {
+      max-width: 100%;
       height: auto;
-      margin-bottom: 1rem;
     }
 
-    .button-group button {
-      background: var(--button-bg);
-      color: var(--button-text);
-      border: none;
-      padding: 0.6rem 1rem;
-      margin: 0.3rem;
-      border-radius: 0.6rem;
+    input, button {
+      padding: 0.6rem;
+      margin: 0.5rem 0;
       font-size: 1rem;
-      cursor: pointer;
-      transition: background 0.3s;
+      border-radius: 0.4rem;
+      border: none;
     }
 
-    .button-group button:hover {
-      opacity: 0.85;
+    input[type="text"], input[type="number"] {
+      width: calc(100% - 1rem);
+    }
+
+    button.price-button {
+      background: #f47738;
+      color: #fff;
+      font-weight: bold;
+      margin: 0.3rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button.price-button:hover {
+      background: #d85c20;
     }
 
     .barcode-frame {
-      background: var(--card-bg);
-      border-radius: 1rem;
+      background: #fff;
       padding: 1rem;
+      border-radius: 0.8rem;
       margin-top: 1rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      overflow: hidden;
     }
 
     canvas {
-      width: 100%;
-      max-width: 400px;
-      height: auto;
-      background: var(--card-bg);
+      max-width: 100%;
     }
 
-    .barcode-caption {
-      font-size: 0.9rem;
-      color: var(--caption-color);
+    .watermark {
+      font-size: 0.8rem;
+      color: #444;
       margin-top: 0.5rem;
-      word-break: break-word;
     }
 
-    .input-box {
+    .dark-mode-toggle {
+      background: #333;
+      color: #fff;
+      border: 1px solid #666;
       margin-top: 1rem;
     }
 
-    input {
-      padding: 0.5rem;
-      font-size: 1rem;
-      margin: 0.3rem 0;
-      width: 100%;
-      border: 1px solid #ccc;
-      border-radius: 0.5rem;
+    body.light-mode {
+      background: #f0f0f0;
+      color: #333;
     }
 
-    .download-btn {
-      background: var(--button-bg);
-      color: var(--button-text);
-      border: none;
-      padding: 0.6rem 1.2rem;
-      border-radius: 0.6rem;
-      font-size: 1rem;
-      margin-top: 1rem;
-      cursor: pointer;
-      transition: 0.3s;
+    body.light-mode .container {
+      background: #fff;
+      color: #000;
     }
 
-    .download-btn:hover {
-      opacity: 0.85;
+    body.light-mode button.price-button {
+      background: #f47738;
     }
 
-    .toggle-btn {
-      position: fixed;
-      top: 1rem;
-      right: 1rem;
-      background: var(--card-bg);
-      color: var(--text-color);
-      border: 2px solid var(--text-color);
-      padding: 0.6rem 1rem;
-      border-radius: 2rem;
-      font-size: 0.9rem;
-      cursor: pointer;
-      z-index: 999;
-      transition: 0.3s;
-    }
-
-    .toggle-btn:hover {
-      background: var(--text-color);
-      color: var(--card-bg);
+    body.light-mode .dark-mode-toggle {
+      background: #ddd;
+      color: #333;
     }
   </style>
 </head>
 <body>
 
-  <button id="toggleMode" class="toggle-btn" onclick="toggleDarkMode()">🌙 Dark Mode</button>
+<div class="container">
+  <img src="https://monkeymansilly1.github.io/Sainsbury-sgen/sainsburys-logo-png-transparent.png" alt="Sainsbury's Logo" />
 
-  <div class="container">
-    <img src="https://raw.githubusercontent.com/Monkeymansilly1/Sainsbury-sgen/main/sainsburys-logo-png-transparent.png" alt="Sainsbury's Logo" class="logo" />
+  <input type="text" id="productCode" placeholder="Enter 13-digit barcode" maxlength="13"
+         oninput="this.value=this.value.replace(/\\D/g,'').slice(0,13)" />
 
-    <h2>Sainsbury's Barcode Generator</h2>
-
-    <div class="button-group">
-      <button onclick="setPrice(10)">10p</button>
-      <button onclick="setPrice(40)">40p</button>
-      <button onclick="setPrice(100)">£1</button>
-      <button onclick="customPrice()">Custom</button>
-    </div>
-
-    <div class="input-box">
-      <input type="text" id="productCode" placeholder="Enter 13-digit barcode" maxlength="13" />
-      <input type="number" id="price" placeholder="Or enter price (p)" min="1" max="9999" />
-    </div>
-
-    <button class="download-btn" onclick="generateBarcode()">Generate Barcode</button>
-
-    <div class="barcode-frame">
-      <canvas id="barcodeCanvas" width="400" height="150"></canvas>
-      <div class="barcode-caption">
-        monkeymansilly1.github.io
-      </div>
-    </div>
-
-    <a id="downloadLink" download="barcode.png">
-      <button class="download-btn">Download PNG</button>
-    </a>
+  <div>
+    <button class="price-button" onclick="setPriceAndGenerate(10)">10p</button>
+    <button class="price-button" onclick="setPriceAndGenerate(49)">49p</button>
+    <button class="price-button" onclick="setPriceAndGenerate(100)">£1</button>
+    <button class="price-button" onclick="showCustomPrice()">Custom</button>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-  <script>
-    function padLeft(str, length) {
-      return str.toString().padStart(length, '0');
-    }
+  <div id="customPriceContainer" style="display:none;">
+    <input type="number" id="price" placeholder="Enter price in pence" min="1" max="9999" />
+    <button onclick="generateBarcode()">Generate Barcode</button>
+  </div>
 
-    function calculateCheckDigit(input) {
-      let sum = 0;
-      for (let i = 0; i < input.length; i++) {
-        const digit = parseInt(input[input.length - 1 - i], 10);
-        const weight = (i % 2 === 0) ? 3 : 1;
-        sum += digit * weight;
-      }
-      let checkDigit = (10 - (sum % 10)) % 10;
-      if (checkDigit % 2 === 0) {
-        checkDigit = (checkDigit + 1) % 10;
-      }
-      return checkDigit;
-    }
+  <div class="barcode-frame">
+    <canvas id="barcodeCanvas" width="400" height="150"></canvas>
+    <div class="watermark">monkeymansilly1.github.io</div>
+  </div>
 
-    function setPrice(pence) {
-      document.getElementById("price").value = pence;
-    }
+  <button class="dark-mode-toggle" onclick="toggleDarkMode()">Toggle Dark Mode</button>
+</div>
 
-    function customPrice() {
-      const custom = prompt("Enter your custom price in pence (1 - 9999):");
-      if (custom && !isNaN(custom) && custom >= 1 && custom <= 9999) {
-        document.getElementById("price").value = custom;
-      } else {
-        alert("Invalid price entered.");
-      }
-    }
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 
-    function generateBarcode() {
-      const productInput = document.getElementById('productCode').value;
-      const priceInput = parseInt(document.getElementById('price').value);
+<script>
+function padLeft(str, length) {
+  return str.toString().padStart(length, '0');
+}
 
-      if (isNaN(priceInput) || priceInput < 1 || priceInput > 9999) {
-        alert("Price must be between 1 and 9999 (e.g., 10 = 10p)");
-        return;
-      }
+function calculateCheckDigit(input) {
+  let sum = 0;
+  for (let i = 0; i < input.length; i++) {
+    const digit = parseInt(input[input.length - 1 - i], 10);
+    const weight = (i % 2 === 0) ? 3 : 1;
+    sum += digit * weight;
+  }
+  let checkDigit = (10 - (sum % 10)) % 10;
+  return checkDigit;
+}
 
-      const numericProduct = productInput.replace(/\D/g, '');
-      let productDigits = numericProduct.length === 14 ? numericProduct.slice(0, -1) : numericProduct;
-      productDigits = padLeft(productDigits, 13);
+function generateBarcode() {
+  const productInput = document.getElementById('productCode').value;
+  const priceInput = document.getElementById('price').value;
 
-      const paddedPrice = padLeft(priceInput, 6);
-      const baseNumber = `91${productDigits}${paddedPrice}`;
-      const checkDigit = calculateCheckDigit(baseNumber);
-      const fullBarcode = `${baseNumber}${checkDigit}`;
+  if (!productInput || productInput.length < 8) {
+    alert("Enter a valid barcode (at least 8 digits).");
+    return;
+  }
 
-      const canvas = document.getElementById("barcodeCanvas");
-      JsBarcode(canvas, fullBarcode, {
-        format: "CODE128",
-        displayValue: true,
-        fontSize: 18,
-        width: 2,
-        height: 100,
-        margin: 10
-      });
+  const numericProduct = productInput.replace(/\D/g, '');
+  let productDigits = numericProduct.length === 14 ? numericProduct.slice(0, -1) : numericProduct;
+  productDigits = padLeft(productDigits, 13);
 
-      const downloadLink = document.getElementById("downloadLink");
-      downloadLink.href = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
-    }
+  const paddedPrice = padLeft(priceInput, 6);
+  const baseNumber = `91${productDigits}${paddedPrice}`;
+  const checkDigit = calculateCheckDigit(baseNumber);
+  const fullBarcode = `${baseNumber}${checkDigit}`;
 
-    function toggleDarkMode() {
-      document.body.classList.toggle("dark-mode");
-    }
-  </script>
+  const canvas = document.getElementById("barcodeCanvas");
+  JsBarcode(canvas, fullBarcode, {
+    format: "CODE128",
+    displayValue: true,
+    fontSize: 16,
+    width: 2,
+    height: 80,
+    margin: 5
+  });
+}
+
+function setPriceAndGenerate(pence) {
+  document.getElementById('price').value = pence;
+  document.getElementById('customPriceContainer').style.display = 'none';
+  generateBarcode();
+}
+
+function showCustomPrice() {
+  document.getElementById('customPriceContainer').style.display = 'block';
+}
+
+function toggleDarkMode() {
+  document.body.classList.toggle("light-mode");
+}
+</script>
+
 </body>
-      </html>
+</html>
